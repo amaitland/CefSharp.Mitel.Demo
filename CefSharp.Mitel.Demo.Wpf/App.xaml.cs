@@ -10,7 +10,8 @@ namespace CefSharp.Mitel.Demo.Wpf
     /// </summary>
     public partial class App : Application
     {
-        public App()
+
+        protected override void OnStartup(StartupEventArgs e)
         {
             var settings = new CefSettings()
             {
@@ -29,12 +30,17 @@ namespace CefSharp.Mitel.Demo.Wpf
             settings.CefCommandLineArgs.Add("use-fake-ui-for-media-stream");
             //For screen sharing add (see https://bitbucket.org/chromiumembedded/cef/issues/2582/allow-run-time-handling-of-media-access#comment-58677180)
             settings.CefCommandLineArgs.Add("enable-usermedia-screen-capturing");
-            
+
             //Force render accessibility
             settings.CefCommandLineArgs.Add("force-renderer-accessibility");
 
+            //Integrate CEF into WPF message loop using IntegratedMessageLoopBrowserProcessHandler
+            settings.MultiThreadedMessageLoop = false;
+
             //Perform dependency check to make sure all relevant resources are in our output directory.
-            Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
+            Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: new CefSharp.Wpf.HwndHost.Handler.IntegratedMessageLoopBrowserProcessHandler(Dispatcher));
+
+            base.OnStartup(e);
         }
     }
 }
